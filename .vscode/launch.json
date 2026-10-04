@@ -1,0 +1,33 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "GEMM N=1024  (-O2)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "D:/gemm/gemm.exe",
+            "args": ["1024", "3"],
+            "stopAtEntry": false,
+            "cwd": "D:/gemm",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "D:/c-compiler/mingw64/bin/gdb.exe",
+            "preLaunchTask": "只编译（查语法错）"
+        },
+        {
+            "name": "GEMM N=2048  (-O2)",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "D:/gemm/gemm.exe",
+            "args": ["2048", "1"],
+            "stopAtEntry": false,
+            "cwd": "D:/gemm",
+            "environment": [],
+            "externalConsole": true,
+            "MIMode": "gdb",
+            "miDebuggerPath": "D:/c-compiler/mingw64/bin/gdb.exe",
+            "preLaunchTask": "只编译（查语法错）"
+        }
+    ]
+}

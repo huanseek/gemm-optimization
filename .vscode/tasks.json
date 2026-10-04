@@ -1,0 +1,61 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "运行 N=1024  (Ctrl+Shift+B)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\build.cmd",
+            "args": ["1024", "3"],
+            "group": { "kind": "build", "isDefault": true },
+            "problemMatcher": ["$gcc"],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "label": "运行 N=256",
+            "type": "shell",
+            "command": "${workspaceFolder}\\build.cmd",
+            "args": ["256", "5"],
+            "problemMatcher": ["$gcc"],
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "运行 N=512",
+            "type": "shell",
+            "command": "${workspaceFolder}\\build.cmd",
+            "args": ["512", "3"],
+            "problemMatcher": ["$gcc"],
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "运行 N=2048",
+            "type": "shell",
+            "command": "${workspaceFolder}\\build.cmd",
+            "args": ["2048", "1"],
+            "problemMatcher": ["$gcc"],
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "只编译（查语法错）",
+            "type": "shell",
+            "command": "${workspaceFolder}\\build.cmd",
+            "args": ["0"],
+            "problemMatcher": ["$gcc"],
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
+            "label": "扫描四个规模 (256/512/1024/2048)",
+            "type": "shell",
+            "command": "cmd",
+            "args": [
+                "/c",
+                "${workspaceFolder}\\build.cmd 256 5 && ${workspaceFolder}\\build.cmd 512 3 && ${workspaceFolder}\\build.cmd 1024 3 && ${workspaceFolder}\\build.cmd 2048 1"
+            ],
+            "problemMatcher": ["$gcc"],
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        }
+    ]
+}

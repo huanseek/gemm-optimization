@@ -1,6 +1,15 @@
+# 编译产物
 *.exe
 *.o
 *.obj
 *.out
 a.out
-.vscode/
+
+# 备份文件（不要提交）
+*.bak_*
+*.bak
+*~
+
+# 编辑器临时文件
+*.swp
+*.tmp

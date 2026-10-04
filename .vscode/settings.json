@@ -1,0 +1,12 @@
+{
+    "files.encoding": "utf8",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.rulers": [100],
+    "editor.renderWhitespace": "boundary",
+    "files.trimTrailingWhitespace": true,
+    "files.insertFinalNewline": true,
+    "terminal.integrated.defaultProfile.windows": "Command Prompt",
+    "C_Cpp.default.cStandard": "c17",
+    "C_Cpp.default.compilerPath": "D:/c-compiler/mingw64/bin/gcc.exe"
+}
