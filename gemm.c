@@ -172,6 +172,10 @@ typedef void (*gemm_fn)(int, const data_t *, const data_t *, data_t *);
 
 static double bench(const char *name, gemm_fn f, int N,
                     const data_t *A, const data_t *B, data_t *C, int reps) {
+    /* 先报"我在跑"，否则大 N 时黑屏几分钟，看起来像卡死 */
+    printf("  %-10s  N=%-5d  measuring ...\n", name, N);
+    fflush(stdout);
+
     f(N, A, B, C);                              /* 预热：避免首次缺页污染计时 */
 
     /* ★ 纪律三：正确性优先于性能。
@@ -202,6 +206,16 @@ int main(int argc, char **argv) {
     int N    = (argc > 1) ? atoi(argv[1]) : 1024;
     int reps = (argc > 2) ? atoi(argv[2]) : 3;
     if (N < 64) { printf("N must be >= 64\n"); return 1; }
+
+    /* ★ N 大时自动把重复次数降到 1。
+     *   N=2048 时 v0 一次就要几十秒，跑 4 遍（1 次预热 + 3 次计时）要三分钟，
+     *   看起来就像卡死了。 */
+    if (N >= 2048 && reps > 1) {
+        printf("  [note] N=%d is slow; forcing reps=1 (was %d)\n", N, reps);
+        reps = 1;
+    }
+    if (N >= 2048)
+        printf("  [note] N=%d may take several MINUTES. Please wait.\n", N);
 
     size_t sz = (size_t)N * N * sizeof(data_t);
     data_t *A = (data_t *)xmalloc(sz);
