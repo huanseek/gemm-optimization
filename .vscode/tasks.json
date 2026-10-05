@@ -2,6 +2,14 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "★ 对照实验 aliasing (exp_alias)",
+            "type": "shell",
+            "command": "${workspaceFolder}\\run_exp.cmd",
+            "args": ["1024", "3"],
+            "problemMatcher": ["$gcc"],
+            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+        },
+        {
             "label": "运行 N=1024  (Ctrl+Shift+B)",
             "type": "shell",
             "command": "${workspaceFolder}\\build.cmd",
