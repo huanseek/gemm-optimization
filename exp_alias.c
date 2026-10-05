@@ -216,7 +216,8 @@ int main(int argc, char **argv) {
         }
     }
 
-    printf("\n=== 对照实验：只改行跨度  N=%d  PAD=%d  best of %d ===\n", N, PAD, reps);
+    printf("\n=== controlled experiment: change stride only   N=%d  PAD=%d  best of %d ===\n",
+           N, PAD, reps);
     printf("    cpu probe = %.3f G iter/s   (low = CPU throttled, discard this run)\n\n",
            cpu_probe());
     printf("  version        size          time          perf            check\n");
@@ -227,7 +228,7 @@ int main(int argc, char **argv) {
 
     printf("\n  N=%d  PAD=%d  →  %.3f  →  %.3f GFLOPS   (%.2fx)\n",
            N, PAD, g0, g1, (g0 > 0) ? g1 / g0 : 0.0);
-    printf("  数据总量 %d KB -> %d KB（几乎没变）\n",
+    printf("  data size %d KB -> %d KB (basically unchanged)\n",
            (int)((sz * 3) / 1024), (int)((sz_pad * 3) / 1024));
     printf("\n");
 
