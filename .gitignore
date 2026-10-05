@@ -5,6 +5,9 @@
 *.out
 a.out
 
+# 反汇编输出（327 KB，随时可以用 disasm.cmd 重新生成）
+asm.txt
+
 # 备份文件（不要提交）
 *.bak_*
 *.bak

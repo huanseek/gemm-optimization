@@ -5,17 +5,34 @@
             "label": "★ 对照实验 aliasing (exp_alias)",
             "type": "shell",
             "command": "${workspaceFolder}\\run_exp.cmd",
-            "args": ["1024", "3"],
-            "problemMatcher": ["$gcc"],
-            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+            "args": [
+                "1024",
+                "3"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
         },
         {
             "label": "运行 N=1024  (Ctrl+Shift+B)",
             "type": "shell",
             "command": "${workspaceFolder}\\build.cmd",
-            "args": ["1024", "3"],
-            "group": { "kind": "build", "isDefault": true },
-            "problemMatcher": ["$gcc"],
+            "args": [
+                "1024",
+                "3"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
             "presentation": {
                 "reveal": "always",
                 "panel": "shared",
@@ -26,33 +43,68 @@
             "label": "运行 N=256",
             "type": "shell",
             "command": "${workspaceFolder}\\build.cmd",
-            "args": ["256", "5"],
-            "problemMatcher": ["$gcc"],
-            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+            "args": [
+                "256",
+                "5"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
         },
         {
             "label": "运行 N=512",
             "type": "shell",
             "command": "${workspaceFolder}\\build.cmd",
-            "args": ["512", "3"],
-            "problemMatcher": ["$gcc"],
-            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+            "args": [
+                "512",
+                "3"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
         },
         {
             "label": "运行 N=2048",
             "type": "shell",
             "command": "${workspaceFolder}\\build.cmd",
-            "args": ["2048", "1"],
-            "problemMatcher": ["$gcc"],
-            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+            "args": [
+                "2048",
+                "1"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
         },
         {
             "label": "只编译（查语法错）",
             "type": "shell",
             "command": "${workspaceFolder}\\build.cmd",
-            "args": ["0"],
-            "problemMatcher": ["$gcc"],
-            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+            "args": [
+                "0"
+            ],
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
         },
         {
             "label": "扫描四个规模 (256/512/1024/2048)",
@@ -62,8 +114,37 @@
                 "/c",
                 "${workspaceFolder}\\build.cmd 256 5 && ${workspaceFolder}\\build.cmd 512 3 && ${workspaceFolder}\\build.cmd 1024 3 && ${workspaceFolder}\\build.cmd 2048 1"
             ],
-            "problemMatcher": ["$gcc"],
-            "presentation": { "reveal": "always", "panel": "shared", "clear": true }
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "presentation": {
+                "reveal": "always",
+                "panel": "shared",
+                "clear": true
+            }
+        },
+        {
+            "type": "cppbuild",
+            "label": "C/C++: gcc.exe 生成活动文件",
+            "command": "D:/c-compiler/mingw64/bin/gcc.exe",
+            "args": [
+                "-fdiagnostics-color=always",
+                "-g",
+                "${file}",
+                "-o",
+                "${fileDirname}\\${fileBasenameNoExtension}.exe"
+            ],
+            "options": {
+                "cwd": "D:/c-compiler/mingw64/bin"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "调试器生成的任务。"
         }
     ]
 }
