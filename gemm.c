@@ -30,6 +30,7 @@
 #ifdef _WIN32
 #  include <windows.h>
 #  include <malloc.h>
+#  include <io.h>
 static double now_sec(void) {
     LARGE_INTEGER f, c;
     QueryPerformanceFrequency(&f);
@@ -40,6 +41,7 @@ static void *xmalloc(size_t n) { return _aligned_malloc(n, 64); }
 static void  xfree(void *p)    { _aligned_free(p); }
 #else
 #  include <time.h>
+#  include <unistd.h>
 static double now_sec(void) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -170,11 +172,21 @@ static double cpu_probe(void) {
  * ==========================================================================*/
 typedef void (*gemm_fn)(int, const data_t *, const data_t *, data_t *);
 
+/* stdout 是不是终端？（决定要不要显示进度提示） */
+static int stdout_is_tty(void) {
+#ifdef _WIN32
+    return _isatty(_fileno(stdout));
+#else
+    return isatty(fileno(stdout));
+#endif
+}
+
 static double bench(const char *name, gemm_fn f, int N,
                     const data_t *A, const data_t *B, data_t *C, int reps) {
-    /* 先报"我在跑"，否则大 N 时黑屏几分钟，看起来像卡死 */
-    printf("  %-10s  N=%-5d  measuring ...\n", name, N);
-    fflush(stdout);
+    /* 进度提示：只在终端显示，而且会被 \r 覆盖掉，
+     * 所以最终输出里不会多出这一行。 */
+    int tty = stdout_is_tty();
+    if (tty) { printf("  %-10s  N=%-5d  ...", name, N); fflush(stdout); }
 
     f(N, A, B, C);                              /* 预热：避免首次缺页污染计时 */
 
@@ -182,6 +194,7 @@ static double bench(const char *name, gemm_fn f, int N,
      *   结果不对，一律不测性能、不报 GFLOPS——
      *   因为一个算错的程序跑得再快，也只是一组假数据。            */
     if (!verify(N, A, B, C, 0)) {
+        if (tty) printf("\r");
         printf("  %-10s  N=%-5d  %10s   %10s   [*** WRONG RESULT - no perf ***]\n",
                name, N, "-", "N/A");
         verify(N, A, B, C, 1);
@@ -197,7 +210,8 @@ static double bench(const char *name, gemm_fn f, int N,
     }
 
     double gflops = 2.0 * (double)N * N * N / best / 1e9;
-    printf("  %-10s  N=%-5d  %10.2f ms   %10.3f GFLOPS   [OK]\n",
+    if (tty) printf("\r");
+    printf("  %-10s  N=%-5d  %10.2f ms   %10.3f GFLOPS   [OK]            \n",
            name, N, best * 1000.0, gflops);
     return gflops;
 }
