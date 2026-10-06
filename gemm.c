@@ -221,15 +221,18 @@ int main(int argc, char **argv) {
     int reps = (argc > 2) ? atoi(argv[2]) : 3;
     if (N < 64) { printf("N must be >= 64\n"); return 1; }
 
-    /* ★ N 大时自动把重复次数降到 1。
-     *   N=2048 时 v0 一次就要几十秒，跑 4 遍（1 次预热 + 3 次计时）要三分钟，
-     *   看起来就像卡死了。 */
-    if (N >= 2048 && reps > 1) {
-        printf("  [note] N=%d is slow; forcing reps=1 (was %d)\n", N, reps);
+    /* ★ N 大时自动把重复次数降到 1 —— 但只在用户没显式给 reps 的时候。
+     *   显式给了就听用户的：大 N 的数据抖动很大，有时必须多跑几次。
+     *   （N=2048 时 v0 一次就要几十秒，跑 4 遍要三分钟。） */
+    int reps_given = (argc > 2);
+    if (N >= 2048 && !reps_given) {
+        printf("  [note] N=%d is slow; using reps=1 "
+               "(pass a reps argument to override)\n", N);
         reps = 1;
     }
     if (N >= 2048)
-        printf("  [note] N=%d may take several MINUTES. Please wait.\n", N);
+        printf("  [note] N=%d x %d reps may take several MINUTES. Please wait.\n",
+               N, reps);
 
     size_t sz = (size_t)N * N * sizeof(data_t);
     data_t *A = (data_t *)xmalloc(sz);
