@@ -167,6 +167,17 @@ static double cpu_probe(void) {
     return (double)n / (t1 - t0) / 1e9;      /* 每秒多少 G 次迭代 */
 }
 
+/* 跑 3 次取最大。
+ * 探针本身有 ±5% 的抖动，而抖动只会让读数变小 —— 取最大最接近真实主频。 */
+static double cpu_probe_best(void) {
+    double b = 0.0;
+    for (int i = 0; i < 3; i++) {
+        double v = cpu_probe();
+        if (v > b) b = v;
+    }
+    return b;
+}
+
 /* ============================================================================
  *  计时 + 出数
  * ==========================================================================*/
@@ -201,18 +212,30 @@ static double bench(const char *name, gemm_fn f, int N,
         return 0.0;
     }
 
-    double best = 1e30;
+    double best = 1e30, worst = 0.0;
     for (int r = 0; r < reps; r++) {
         double t0 = now_sec();
         f(N, A, B, C);
         double t1 = now_sec();
-        if (t1 - t0 < best) best = t1 - t0;
+        double dt = t1 - t0;
+        if (dt < best)  best  = dt;
+        if (dt > worst) worst = dt;
     }
 
     double gflops = 2.0 * (double)N * N * N / best / 1e9;
     if (tty) printf("\r");
     printf("  %-10s  N=%-5d  %10.2f ms   %10.3f GFLOPS   [OK]            \n",
            name, N, best * 1000.0, gflops);
+
+    /* 重复测了就把抖动也报出来。
+     * "best of N" 只留下最好的一次，看不出数据稳不稳 ——
+     * 而大 N 的时候数据本来就会摆，这个数字决定结论能不能站住。 */
+    if (reps > 1) {
+        double spread = (worst - best) / best * 100.0;
+        printf("  %-10s  %-5s  best %.2f ms / worst %.2f ms   (抖动 %.1f%%)%s\n",
+               "", "", best * 1000.0, worst * 1000.0, spread,
+               spread > 20.0 ? "   <<< 数据不稳，结论要谨慎" : "");
+    }
     return gflops;
 }
 
@@ -263,12 +286,23 @@ int main(int argc, char **argv) {
     printf("    **********************************************************\n\n");
 #endif
 
-    printf("    cpu probe = %.3f G iter/s   (low = CPU throttled, discard this run)\n\n",
-           cpu_probe());
+    /* ★ 探针测两次：开头一次、结尾一次。
+     *   大 N 的时候一次要跑几十秒，机器完全可能在中间降频 ——
+     *   只测开头的话你看不出来，结尾那一测就是用来抓这件事的。 */
+    double probe0 = cpu_probe_best();
+    printf("    cpu probe = %.3f G iter/s   (start)\n\n", probe0);
     printf("  version        size          time          perf            check\n");
     printf("  ---------------------------------------------------------------------\n");
     bench("v0 i-j-k", gemm_v0, N, A, B, C, reps);
     bench("v1 i-k-j", gemm_v1, N, A, B, C, reps);
+
+    double probe1 = cpu_probe_best();
+    double drop = (probe0 > 0) ? (probe0 - probe1) / probe0 * 100.0 : 0.0;
+    printf("\n    cpu probe = %.3f G iter/s   (end)   ", probe1);
+    if (drop > 15.0)
+        printf("*** probe 掉了 %.0f%% -> 这次数据不可比，重测 ***\n", drop);
+    else
+        printf("(probe 变化 %+.0f%%)\n", -drop);
     printf("\n  >>> copy these two lines into the xlsx perf table\n\n");
 
     xfree(A); xfree(B); xfree(C);
