@@ -232,9 +232,9 @@ static double bench(const char *name, gemm_fn f, int N,
      * 而大 N 的时候数据本来就会摆，这个数字决定结论能不能站住。 */
     if (reps > 1) {
         double spread = (worst - best) / best * 100.0;
-        printf("  %-10s  %-5s  best %.2f ms / worst %.2f ms   (抖动 %.1f%%)%s\n",
+        printf("  %-10s  %-5s  best %.2f ms / worst %.2f ms   (spread %.1f%%)%s\n",
                "", "", best * 1000.0, worst * 1000.0, spread,
-               spread > 20.0 ? "   <<< 数据不稳，结论要谨慎" : "");
+               spread > 20.0 ? "   <<< UNSTABLE, treat with care" : "");
     }
     return gflops;
 }
@@ -300,9 +300,9 @@ int main(int argc, char **argv) {
     double drop = (probe0 > 0) ? (probe0 - probe1) / probe0 * 100.0 : 0.0;
     printf("\n    cpu probe = %.3f G iter/s   (end)   ", probe1);
     if (drop > 15.0)
-        printf("*** probe 掉了 %.0f%% -> 这次数据不可比，重测 ***\n", drop);
+        printf("*** probe dropped %.0f%% -> this run is not comparable, rerun ***\n", drop);
     else
-        printf("(probe 变化 %+.0f%%)\n", -drop);
+        printf("(probe changed %+.0f%%)\n", -drop);
     printf("\n  >>> copy these two lines into the xlsx perf table\n\n");
 
     xfree(A); xfree(B); xfree(C);
