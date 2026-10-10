@@ -85,30 +85,7 @@ void gemm_v0(int N, const data_t *A, const data_t *B, data_t *C) {
     }
 }
 
-/* ============================================================================
- *  v1：换序 i-k-j          【★ 留给你写，大概 8 行】
- *
- *  v0 为什么慢：
- *      最内层是 k 循环，访问 B[k*N + j] —— k 每加 1，地址跳 N 个元素。
- *      对 N=1024 的 float 矩阵是跳 4KB = 跨了 64 条 cache line。
- *      所以每算一个乘加就要拉一条新 cache line，命中率极低。
- *
- *  v1 要做的：
- *      最内层换成 j 循环，B[k*N + j] 随 j 连续递增，一条 cache line 能用 16 次。
- *
- *  骨架（先自己写一遍，卡住了再对照）：
- *
- *      memset(C, 0, sizeof(data_t) * (size_t)N * N);
- *      for (int i = 0; i < N; i++) {
- *          for (int k = 0; k < N; k++) {
- *              data_t a = A[i * N + k];          // 取到局部变量，别重复访存
- *              for (int j = 0; j < N; j++)
- *                  C[i * N + j] += a * B[k * N + j];
- *          }
- *      }
- *
- *  写错了没关系，程序会告诉你结果对不对。
- * ==========================================================================*/
+
 void gemm_v1(int N, const data_t *A, const data_t *B, data_t *C) {
     memset(C, 0, sizeof(data_t) * (size_t)N * N);
     for (int i = 0; i < N; i++) {
@@ -119,6 +96,27 @@ void gemm_v1(int N, const data_t *A, const data_t *B, data_t *C) {
         }
     }
 }
+
+
+void gemm_v2(int N, const data_t *restrict A, const data_t *restrict B, data_t *restrict C) {
+    memset(C, 0, sizeof(data_t) * (size_t)N * N);
+    for (int i = 0; i < N; i++) {
+        for (int k = 0; k < N; k++) {
+            int j;
+            data_t a=A[i * N + k];
+            for (j = 0; j+4< N; j+=4) {
+                C[i * N + j] += a * B[k * N + j];
+                C[i * N + j+1] += a * B[k * N + j+1];
+                C[i * N + j+2] += a * B[k * N + j+2];
+                C[i * N + j+3] += a * B[k * N + j+3];
+            }
+            for (;j<N;j++){
+                C[i * N + j] += a * B[k * N + j];
+            }
+        }
+    }
+}
+
 
 /* ============================================================================
  *  正确性自检：随机抽查 64 个格子，直接算点积对比
@@ -295,6 +293,7 @@ int main(int argc, char **argv) {
     printf("  ---------------------------------------------------------------------\n");
     bench("v0 i-j-k", gemm_v0, N, A, B, C, reps);
     bench("v1 i-k-j", gemm_v1, N, A, B, C, reps);
+    bench("v2 i-k-j", gemm_v2, N, A, B, C, reps);
 
     double probe1 = cpu_probe_best();
     double drop = (probe0 > 0) ? (probe0 - probe1) / probe0 * 100.0 : 0.0;
