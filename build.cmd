@@ -12,7 +12,12 @@ if "%N%"=="" set "N=1024"
 set "REPS=%~2"
 if "%REPS%"=="" set "REPS=3"
 
-gcc -O2 -Wall -o gemm.exe gemm.c
+rem  Compile standard, pinned 2026-10-11.
+rem  Do NOT change this without re-measuring v0/v1/v2 and saying so in the log.
+rem    -O3     : let the compiler vectorize on its own (it does at -O3, not -O2)
+rem    -mavx2  : allow 256-bit vectors (ymm, 8 floats)
+rem    -mfma   : allow fused multiply-add
+gcc -O3 -mavx2 -mfma -Wall -o gemm.exe gemm.c
 if errorlevel 1 (
   echo.
   echo ===== BUILD FAILED =====
