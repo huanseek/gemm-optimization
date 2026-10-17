@@ -71,6 +71,10 @@ typedef float data_t;          /* 先用 float：后面测 SIMD 时效果更直�
 #  define BUILT_OPTIMIZED 0
 #endif
 
+#ifndef KBLOCK
+#define KBLOCK 128
+#endif
+
 /* ============================================================================
  *  v0：朴素 i-j-k          【已完成，作为基线】
  * ==========================================================================*/
@@ -112,6 +116,24 @@ void gemm_v2(int N, const data_t *restrict A, const data_t *restrict B, data_t *
             }
             for (;j<N;j++){
                 C[i * N + j] += a * B[k * N + j];
+            }
+        }
+    }
+}
+
+
+void gemm_v3(int N, const data_t *A, const data_t *B, data_t *C) {
+    memset(C, 0, sizeof(data_t) * (size_t)N * N);
+    for (int kk=0; kk<N; kk+=KBLOCK){
+        int kend = kk+KBLOCK;
+        if(kend>N)
+            kend=N;
+        for(int i=0;i<N;i++){
+            for(int k=kk;k<kend;k++){
+                data_t a=A[i*N+k];
+                for(int j=0;j<N;j++){
+                    C[i*N+j]+=a*B[k*N+j];
+                }
             }
         }
     }
@@ -294,6 +316,7 @@ int main(int argc, char **argv) {
     bench("v0 i-j-k", gemm_v0, N, A, B, C, reps);
     bench("v1 i-k-j", gemm_v1, N, A, B, C, reps);
     bench("v2 i-k-j", gemm_v2, N, A, B, C, reps);
+    bench("v3 i-k-j", gemm_v3, N, A, B, C, reps);
 
     double probe1 = cpu_probe_best();
     double drop = (probe0 > 0) ? (probe0 - probe1) / probe0 * 100.0 : 0.0;
