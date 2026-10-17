@@ -7,8 +7,12 @@ if "%N%"=="" set "N=1024"
 set "REPS=%~2"
 if "%REPS%"=="" set "REPS=3"
 
-echo === Build: gcc -O3 -mavx2 -mfma -Wall -o gemm.exe gemm.c ===
-gcc -O3 -mavx2 -mfma -Wall -o gemm.exe gemm.c
+rem Optional: set KBLOCK=128 before running to sweep the v3 block size.
+set "KFLAG="
+if defined KBLOCK set "KFLAG=-DKBLOCK=%KBLOCK%"
+
+echo === Build: gcc -O3 -mavx2 -mfma %KFLAG% -Wall -o gemm.exe gemm.c ===
+gcc -O3 -mavx2 -mfma %KFLAG% -Wall -o gemm.exe gemm.c
 if errorlevel 1 (
   echo.
   echo ########## BUILD FAILED ##########
