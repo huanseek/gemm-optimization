@@ -16,3 +16,7 @@ asm.txt
 # 编辑器临时文件
 *.swp
 *.tmp
+
+# 误重定向留下的碎片
+past
+still

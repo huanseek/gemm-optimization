@@ -95,7 +95,7 @@ gcc -O2 -o gemm gemm.c
 3. **多次取最快** —— `best of N`，过滤首次缺页和偶发干扰。
 4. **固定环境** —— 插电 + 性能模式 + 关后台，不超频。
 
-详细规范见 [`测量规范.md`](测量规范.md)，逐版记录见 [`实验日志.md`](实验日志.md)。
+详细规范见 [`测量规范.md`](docs/测量规范.md)，逐版记录见 [`实验日志.md`](docs/实验日志.md)。
 
 ---
 
@@ -109,15 +109,41 @@ gcc -O2 -o gemm gemm.c
 
 ---
 
-## 七、文件说明
+## 七、目录结构
 
-| 文件 | 作用 |
+```
+gemm-optimization/
+├─ README.md
+├─ gemm.c                       主程序：v0~v4 各版本 kernel + 计时 + 正确性自检 + probe
+├─ build.cmd                    只编译
+├─ run.cmd                      编译并运行（`run.cmd 1024 3`）
+├─ disasm.cmd                   导出反汇编到 asm.txt
+│
+├─ docs/
+│  ├─ 实验日志.md                逐版实验记录（主文档）
+│  ├─ 测量规范.md                机器状态、编译条件、散热降频的处理规范
+│  └─ 怎么做自己的对照实验.md     方法论：一次只动一个变量
+│
+├─ probes/                      标定机器上限的探针
+│  ├─ peak.c / peak.cmd          单核 FMA 峰值（148.2 GFLOPS）
+│  ├─ cache.c / cache.cmd        各级 cache 容量（指针追逐，必须 -O0）
+│  ├─ bandwidth.c / bandwidth.cmd 内存带宽（单核 26 GB/s）
+│  └─ memshare.c / memshare.cmd  访存占多少时间（62%）
+│
+├─ exp/
+│  └─ exp_alias.c / run_exp.cmd  跨度扰动的对照实验
+│
+└─ .vscode/                     Ctrl+Shift+B 直接出结果
+```
+
+每个 `.cmd` 都用 `cd /d "%~dp0"`，所以脚本和它要编的 `.c` 放在同一个目录就行，换个位置也能跑。
+
+| 想干什么 | 用哪个 |
 |---|---|
-| `gemm.c` | 主程序：各版本 kernel + 计时 + GFLOPS + 正确性自检 + 机器状态探针 |
-| [`实验日志.md`](实验日志.md) | **逐版实验记录**：改了什么、数据、瓶颈分析、失败的尝试 |
-| [`测量规范.md`](测量规范.md) | 散热 / 电源 / 降频 / 编译选项的处理规范 |
-| `run.cmd` · `build.cmd` | 一键编译运行（保证 `-O2`） |
-| `.vscode/tasks.json` | VS Code 构建任务（`Ctrl+Shift+B` 直接出结果） |
+| 看某一版为什么快 / 为什么慢 | `docs/实验日志.md` |
+| 复现某一版的数据 | `run.cmd 1024 3` |
+| 标定这台机器现在的状态 | `probes/peak.cmd`（看 8 累加器那一行能不能到 148） |
+| 想验证"访存占多少" | `probes/memshare.cmd` |
 
 ---
 
