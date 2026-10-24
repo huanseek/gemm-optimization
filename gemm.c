@@ -108,7 +108,7 @@ void gemm_v2(int N, const data_t *restrict A, const data_t *restrict B, data_t *
         for (int k = 0; k < N; k++) {
             int j;
             data_t a=A[i * N + k];
-            for (j = 0; j+4< N; j+=4) {
+            for (j = 0; j+4<=N; j+=4) {
                 C[i * N + j] += a * B[k * N + j];
                 C[i * N + j+1] += a * B[k * N + j+1];
                 C[i * N + j+2] += a * B[k * N + j+2];
@@ -133,6 +133,39 @@ void gemm_v3(int N, const data_t *A, const data_t *B, data_t *C) {
                 data_t a=A[i*N+k];
                 for(int j=0;j<N;j++){
                     C[i*N+j]+=a*B[k*N+j];
+                }
+            }
+        }
+    }
+}
+
+
+void gemm_v4(int N, const data_t *restrict A, const data_t *restrict B, data_t *restrict C) {
+    memset(C, 0, sizeof(data_t) * (size_t)N * N);
+    for (int kk=0; kk<N; kk+=KBLOCK){
+        int kend = kk+KBLOCK;
+        if(kend>N)
+            kend=N;
+        int i=0;
+        for(;i+4<=N;i+=4){
+            for(int k=kk;k<kend;k++){
+                data_t a0=A[i*N+k];
+                data_t a1=A[(i+1)*N+k];
+                data_t a2=A[(i+2)*N+k];
+                data_t a3=A[(i+3)*N+k];
+                for(int j=0;j<N;j++){
+                    data_t b=B[k*N+j];
+                    C[i*N+j]+=a0*b;
+                    C[(i+1)*N+j]+=a1*b;
+                    C[(i+2)*N+j]+=a2*b;
+                    C[(i+3)*N+j]+=a3*b;
+                }
+            }
+        }
+        for(;i<N;i++){
+            for(int k=kk;k<kend;k++){
+                for(int j=0;j<N;j++){
+                    C[i*N+j]+=A[i*N+k]*B[k*N+j];
                 }
             }
         }
@@ -317,6 +350,7 @@ int main(int argc, char **argv) {
     bench("v1 i-k-j", gemm_v1, N, A, B, C, reps);
     bench("v2 i-k-j", gemm_v2, N, A, B, C, reps);
     bench("v3 i-k-j", gemm_v3, N, A, B, C, reps);
+    bench("v4 i-k-j", gemm_v4, N, A, B, C, reps);
 
     double probe1 = cpu_probe_best();
     double drop = (probe0 > 0) ? (probe0 - probe1) / probe0 * 100.0 : 0.0;
