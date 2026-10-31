@@ -140,6 +140,75 @@ void gemm_v3(int N, const data_t *A, const data_t *B, data_t *C) {
 }
 
 
+/* ============================================================================
+ *  v4：v3 的循环展开版(测得结果一致，瓶颈解决效果一样，分块的 cache miss影响因素小)
+ * ==========================================================================
+void gemm_v4(int N, const data_t *restrict A, const data_t *restrict B, data_t *restrict C) {
+    memset(C, 0, sizeof(data_t) * (size_t)N * N);
+    int i = 0;
+    for (; i +4<= N; i+=4) {
+        for (int k = 0; k < N; k++) {
+            data_t a0=A[i * N + k],
+                     a1=A[(i+1) * N + k],
+                     a2=A[(i+2) * N + k],
+                     a3=A[(i+3) * N + k];
+            int j=0;
+            for (; j +4<=N; j+=4) {
+                data_t b0=B[k * N + j],
+                         b1=B[k * N + j+1],
+                         b2=B[k * N + j+2],
+                         b3=B[k * N + j+3];
+                C[i * N + j] += a0 * b0;
+                C[(i+1) * N + j] += a1 * b0;
+                C[(i+2) * N + j] += a2 * b0;
+                C[(i+3) * N + j] += a3 * b0;
+
+                C[i * N + j+1] += a0 * b1;
+                C[(i+1) * N + j+1] += a1 * b1;
+                C[(i+2) * N + j+1] += a2 * b1;
+                C[(i+3) * N + j+1] += a3 * b1;
+
+                C[i * N + j+2] += a0 * b2;
+                C[(i+1) * N + j+2] += a1 * b2;
+                C[(i+2) * N + j+2] += a2 * b2;
+                C[(i+3) * N + j+2] += a3 * b2;
+
+                C[i * N + j+3] += a0 * b3;
+                C[(i+1) * N + j+3] += a1 * b3;
+                C[(i+2) * N + j+3] += a2 * b3;
+                C[(i+3) * N + j+3] += a3 * b3;
+            }
+            for(;j<N;j++){
+                data_t b=B[k * N + j];
+                C[i * N + j] += a0 * b;
+                C[(i+1) * N + j] += a1 * b;
+                C[(i+2) * N + j] += a2 * b;
+                C[(i+3) * N + j] += a3 * b;
+            }
+        }
+    }
+    for (; i < N; i++) {
+        for (int k = 0; k < N; k++) {
+            int j=0;
+            for (; j +4<=N; j+=4) {
+                data_t b0=B[k * N + j],
+                         b1=B[k * N + j+1],
+                         b2=B[k * N + j+2],
+                         b3=B[k * N + j+3];
+                C[i * N + j] += A[i * N + k] * b0;
+                C[i * N + j+1] += A[i * N + k] * b1;
+                C[i * N + j+2] += A[i * N + k] * b2;
+                C[i * N + j+3] += A[i * N + k] * b3;
+            }
+            for(;j<N;j++){
+                C[i * N + j] += A[i * N + k] * B[k * N + j];
+            }
+        }
+    }
+}
+*/
+
+
 void gemm_v4(int N, const data_t *restrict A, const data_t *restrict B, data_t *restrict C) {
     memset(C, 0, sizeof(data_t) * (size_t)N * N);
     for (int kk=0; kk<N; kk+=KBLOCK){
@@ -159,6 +228,47 @@ void gemm_v4(int N, const data_t *restrict A, const data_t *restrict B, data_t *
                     C[(i+1)*N+j]+=a1*b;
                     C[(i+2)*N+j]+=a2*b;
                     C[(i+3)*N+j]+=a3*b;
+                }
+            }
+        }
+        for(;i<N;i++){
+            for(int k=kk;k<kend;k++){
+                for(int j=0;j<N;j++){
+                    C[i*N+j]+=A[i*N+k]*B[k*N+j];
+                }
+            }
+        }
+    }
+}
+
+
+void gemm_v4_i8(int N, const data_t *restrict A, const data_t *restrict B, data_t *restrict C) {
+    memset(C, 0, sizeof(data_t) * (size_t)N * N);
+    for (int kk=0; kk<N; kk+=KBLOCK){
+        int kend = kk+KBLOCK;
+        if(kend>N)
+            kend=N;
+        int i=0;
+        for(;i+8<=N;i+=8){
+            for(int k=kk;k<kend;k++){
+                data_t a0=A[i*N+k];
+                data_t a1=A[(i+1)*N+k];
+                data_t a2=A[(i+2)*N+k];
+                data_t a3=A[(i+3)*N+k];
+                data_t a4=A[(i+4)*N+k];
+                data_t a5=A[(i+5)*N+k];
+                data_t a6=A[(i+6)*N+k];
+                data_t a7=A[(i+7)*N+k];
+                for(int j=0;j<N;j++){
+                    data_t b=B[k*N+j];
+                    C[i*N+j]+=a0*b;
+                    C[(i+1)*N+j]+=a1*b;
+                    C[(i+2)*N+j]+=a2*b;
+                    C[(i+3)*N+j]+=a3*b;
+                    C[(i+4)*N+j]+=a4*b;
+                    C[(i+5)*N+j]+=a5*b;
+                    C[(i+6)*N+j]+=a6*b;
+                    C[(i+7)*N+j]+=a7*b;
                 }
             }
         }
@@ -351,6 +461,7 @@ int main(int argc, char **argv) {
     bench("v2 i-k-j", gemm_v2, N, A, B, C, reps);
     bench("v3 i-k-j", gemm_v3, N, A, B, C, reps);
     bench("v4 i-k-j", gemm_v4, N, A, B, C, reps);
+    bench("v4_i8 i-k-j", gemm_v4_i8, N, A, B, C, reps);
 
     double probe1 = cpu_probe_best();
     double drop = (probe0 > 0) ? (probe0 - probe1) / probe0 * 100.0 : 0.0;
