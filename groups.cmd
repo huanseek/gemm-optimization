@@ -26,10 +26,10 @@ call :grp "all,    20 threads " 20 %MASK_A%
 
 echo.
 echo   Now you have four clean numbers with nothing migrating around:
-echo     P-only 6   -> the honest multi-core ceiling of the P cores
-echo     P-only 12  -> how much hyperthreading helps AVX2  (probably not much)
-echo     E-only 8   -> what the E cores can do at all
-echo     all 20     -> what the OS default gives you
+echo     P-only 6   -^> the honest multi-core ceiling of the P cores
+echo     P-only 12  -^> how much hyperthreading helps AVX2  (probably not much)
+echo     E-only 8   -^> what the E cores can do at all
+echo     all 20     -^> what the OS default gives you
 echo.
 pause
 exit /b 0

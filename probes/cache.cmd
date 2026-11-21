@@ -16,10 +16,10 @@ if errorlevel 1 (
 cache.exe
 echo.
 echo   How to read it:
-echo     flat ~4-5 cycles      -> still in L1
-echo     first step up         -> past L1   (expect near 48 KB)
-echo     second step up        -> past L2   (expect near 1.25 MB)
-echo     third step up         -> past L3   (expect near 24 MB)
+echo     flat ~4-5 cycles      -^> still in L1
+echo     first step up         -^> past L1   (expect near 48 KB)
+echo     second step up        -^> past L2   (expect near 1.25 MB)
+echo     third step up         -^> past L3   (expect near 24 MB)
 echo.
 echo   Close everything else first. Background load inflates every number.
 echo.

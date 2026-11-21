@@ -34,9 +34,9 @@ for %%T in (1 2 3 4 5 6 8 12 16 20) do (
 
 echo.
 echo   Read it:
-echo     v6 line  -> the GFLOPS to compare across thread counts
-echo     best line -> spread. Over 10 percent means rerun that row.
-echo     probe    -> if it swings more than 5 percent, rerun that row.
+echo     v6 line  -^> the GFLOPS to compare across thread counts
+echo     best line -^> spread. Over 10 percent means rerun that row.
+echo     probe    -^> if it swings more than 5 percent, rerun that row.
 echo.
 echo   Where the curve bends is where the P-cores run out.
 echo   If it keeps climbing past 12, the E-cores are still adding something.
