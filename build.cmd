@@ -16,7 +16,7 @@ rem  Compile standard, fixed 2026-10-11. See the experiment log, section 0.
 rem    -O3     : the compiler vectorizes on its own at -O3 (it does not at -O2)
 rem    -mavx2  : 256-bit vectors (ymm, 8 floats)
 rem    -mfma   : fused multiply-add
-gcc -O3 -mavx2 -mfma -Wall -o gemm.exe gemm.c
+gcc -O3 -mavx2 -mfma -fopenmp -Wall -o gemm.exe gemm.c
 if errorlevel 1 (
   echo.
   echo ===== BUILD FAILED =====

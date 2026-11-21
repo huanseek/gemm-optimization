@@ -11,8 +11,8 @@ rem Optional: set KBLOCK=128 before running to sweep the v3 block size.
 set "KFLAG="
 if defined KBLOCK set "KFLAG=-DKBLOCK=%KBLOCK%"
 
-echo === Build: gcc -O3 -mavx2 -mfma %KFLAG% -Wall -o gemm.exe gemm.c ===
-gcc -O3 -mavx2 -mfma %KFLAG% -Wall -o gemm.exe gemm.c
+echo === Build: gcc -O3 -mavx2 -mfma -fopenmp %KFLAG% -Wall -o gemm.exe gemm.c ===
+gcc -O3 -mavx2 -mfma -fopenmp %KFLAG% -Wall -o gemm.exe gemm.c
 if errorlevel 1 (
   echo.
   echo ########## BUILD FAILED ##########
